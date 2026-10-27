@@ -120,7 +120,7 @@ def generate_script(niche: str = "") -> dict:
     user_prompt = f"Topic/Niche: {selected_niche}. Generate the complete 40-second Short."
 
     # Using recommended fast model
-    model = genai.GenerativeModel("gemini-1.5-flash")
+    model = genai.GenerativeModel("gemini-pro")
 
     try:
         response = model.generate_content(
