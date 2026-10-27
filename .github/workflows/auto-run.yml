@@ -1,1 +1,77 @@
+name: Daily Faceless YouTube Short Automation
 
+on:
+  # Daily schedule: Runs every day at 14:00 UTC (10:00 AM EDT / 7:00 AM PDT)
+  schedule:
+    - cron: '0 14 * * *'
+
+  # Manual trigger with configurable options
+  workflow_dispatch:
+    inputs:
+      niche:
+        description: 'Custom topic or niche for today (leave blank for auto-rotation)'
+        required: false
+        default: ''
+      privacy_status:
+        description: 'YouTube Video Privacy'
+        required: true
+        default: 'public'
+        type: choice
+        options:
+          - public
+          - unlisted
+          - private
+
+# Concurrency to avoid overlapping video uploads
+concurrency:
+  group: youtube-shorts-pipeline
+  cancel-in-progress: false
+
+jobs:
+  generate-and-publish:
+    name: Generate & Publish Short
+    runs-on: ubuntu-latest
+    timeout-minutes: 25
+
+    steps:
+      - name: Checkout Repository
+        uses: actions/checkout@v4
+
+      - name: Set up Python 3.10
+        uses: actions/setup-python@v5
+        with:
+          python-version: '3.10'
+          cache: 'pip'
+
+      - name: Install System Dependencies (FFmpeg)
+        run: |
+          sudo apt-get update -qq
+          sudo apt-get install -y -qq ffmpeg
+          ffmpeg -version
+
+      - name: Install Python Requirements
+        run: |
+          python -m pip install --upgrade pip
+          pip install -r requirements.txt
+
+      - name: Execute Faceless YouTube Shorts Automation
+        id: run_bot
+        env:
+          GEMINI_API_KEY: ${{ secrets.GEMINI_API_KEY }}
+          PEXELS_API_KEY: ${{ secrets.PEXELS_API_KEY }}
+          YOUTUBE_CLIENT_SECRET: ${{ secrets.YOUTUBE_CLIENT_SECRET }}
+          YOUTUBE_PRIVACY_STATUS: ${{ github.event.inputs.privacy_status || 'public' }}
+          SHORTS_NICHE: ${{ github.event.inputs.niche || '' }}
+        run: |
+          python bot.py
+
+      - name: Post Job Summary
+        if: always()
+        run: |
+          echo "### 🚀 AutoShorts Execution Status: ${{ job.status }}" >> $GITHUB_STEP_SUMMARY
+          if [ "${{ steps.run_bot.outputs.video_url }}" != "" ]; then
+            echo "- **Uploaded Short:** [Watch on YouTube](${{ steps.run_bot.outputs.video_url }})" >> $GITHUB_STEP_SUMMARY
+            echo "- **Title:** ${{ steps.run_bot.outputs.video_title }}" >> $GITHUB_STEP_SUMMARY
+          fi
+          echo "- **Runner Environment:** Ubuntu Latest (Headless CI)" >> $GITHUB_STEP_SUMMARY
+          echo "- **Engine:** Gemini 1.5 Flash + Edge-TTS + Pexels API + MoviePy 1.0.3" >> $GITHUB_STEP_SUMMARY
