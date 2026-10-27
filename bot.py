@@ -130,7 +130,7 @@ def generate_script(niche: str = "") -> dict:
         raw_text = response.text.strip()
     except Exception as e:
         print(f"[ERROR] Gemini API request failed: {e}")
-        model_fallback = genai.GenerativeModel("gemini-1.5-pro")
+        model_fallback = genai.GenerativeModel("gemini-pro")
         response = model_fallback.generate_content(f"{system_prompt}\n\n{user_prompt}")
         raw_text = response.text.strip()
 
