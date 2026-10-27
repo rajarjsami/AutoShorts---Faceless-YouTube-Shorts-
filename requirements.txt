@@ -1,0 +1,21 @@
+# Faceless YouTube Shorts Automation Dependencies
+# MoviePy pinned strictly to 1.0.3 per user specifications
+moviepy==1.0.3
+
+# Google Gemini Generative AI SDK for script generation
+google-generativeai>=0.8.3
+
+# High-quality Microsoft Edge TTS voice synthesis
+edge-tts>=6.1.12
+
+# HTTP client for Pexels Stock Video API
+requests>=2.31.0
+
+# YouTube Data API v3 Client & Google OAuth
+google-api-python-client>=2.150.0
+google-auth>=2.35.0
+google-auth-oauthlib>=1.2.1
+google-auth-httplib2>=0.2.0
+
+# Environment variables loader
+python-dotenv>=1.0.1
